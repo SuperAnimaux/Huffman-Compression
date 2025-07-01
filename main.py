@@ -1,6 +1,7 @@
 from tree import Huffman_tree
 from file import File
 import ast
+import json
 
 def frequencies_count(string):
     result = {}
@@ -45,14 +46,19 @@ def create_binary_codes(huffman_tree):
     return binary_codes
 
 
-def compress_text(string):
+def compress_text(string, file=False):
 
     char_frequencies = frequencies_count(string)
 
     huffman_tree = create_huffman_tree(char_frequencies)
 
     binary_codes = create_binary_codes(huffman_tree)
-    print(f"This is the table of codes; keep it because it is necessary to decompress the text: {binary_codes}")
+    if file:
+        print("----------------\ncode_table.json is the file containing the table of codes; keep it because it is necessary to decompress the file")
+        with open("code_table.json", "w") as f:
+            json.dump(binary_codes, f)
+    else:
+        print(f"----------------\nThis is the table of codes; keep it because it is necessary to decompress the text: {binary_codes}")
 
     compress_result = ""
 
@@ -60,6 +66,39 @@ def compress_text(string):
         compress_result += binary_codes[char]
     
     return compress_result
+
+
+def read_file(file):
+    with open(f"{file}", "r", encoding="utf-8") as f:
+        content = f.read()
+    return content
+
+def read_compressed_file(filename):
+    with open(filename, "rb") as f:
+        byte_data = f.read()
+    bits = "".join(f"{byte:08b}" for byte in byte_data)
+    return bits
+
+
+def load_json(json_file):
+    with open("code_table.json", "r") as f:
+        code_table = json.load(f)
+    return code_table
+
+
+def compress_file(content):
+    compressed_file = compress_text(content, True)
+    compressed_bytes = bits_to_bytes(compressed_file)
+    with open("compressed_file.bin", "wb") as f:
+        f.write(compressed_bytes)
+
+
+def decompress_file_bin(bin_filename, json_filename):
+    compressed_bits = read_compressed_file(bin_filename)
+    code_table = load_json(json_filename)
+    decompressed_text = decompress(compressed_bits, code_table)
+    with open("decompressed.txt", "w", encoding="utf-8") as f:
+        f.write(decompressed_text)
 
 
 def decompress(binary_string, code_table):
@@ -78,28 +117,53 @@ def decompress(binary_string, code_table):
     return result
 
 
+
+def bits_to_bytes(bits):
+    b = bytearray()
+    for i in range(0, len(bits), 8):
+        byte = bits[i:i+8]
+        if len(byte) < 8:
+            byte = byte.ljust(8, '0')
+        b.append(int(byte, 2))
+    return bytes(b)
+
+
 def main():
     print("Welcome to the Huffman compression algorithm ! \n This project implements the Huffman compression algorithm, an efficient lossless coding technique used to reduce the size of textual data. It calculates character frequencies, builds an optimized Huffman tree, and generates corresponding binary codes for each character.")
     while True :
-        print("Choose a functionality : \n 1. I want to compress a text ! \n 2. I want to decompress a text ! \n 3. I want ot exit")
+        print("----------------\nChoose a functionality : \n 1. I want to compress a text ! \n 2. I want to decompress a text ! \n 3. I want to compress a file (only .txt)\n 4. I want to decompress a file (only .txt).\n 5. I want to exit")
         choose = int(input())
 
         if choose == 1:
             text = input("Enter the text to compress : ")
             binary_text =  ''.join(format(ord(c), '08b') for c in text)
-            print(f"----------------\nThe initial binary of your text is: {binary_text} , with a lenght of {len(text)*8} bits.")
+            print(f"----------------\nThe initial binary of your text is: {binary_text} , with a length of {len(text)*8} bits.")
 
             compressed_text = compress_text(text)
-            print(f"The compressed text is : {compressed_text} , with a lenght of {len(compressed_text)} bits.")
+            print(f"----------------\nThe compressed text is : {compressed_text} , with a length of {len(compressed_text)} bits.")
 
         elif choose == 2:
             compressed_binary = input("Enter the compressed binary : ")
             codes_table = ast.literal_eval(input("Enter the table of codes : "))
 
-            print(f"The text is : {decompress(compressed_binary, codes_table)}")
+            print(f"----------------\nThe text is : {decompress(compressed_binary, codes_table)}")
 
-        else:
-            print("Error")
+        elif choose == 3:
+            print("Please make sure the file is in the same directory")
+            file = input("Enter the filename with the .txt : ")
+            file_content = read_file(file)
+
+            compress_file(file_content)
+
+        elif choose == 4:
+            print("Please make sure the file and the .json are in the same directory")
+            file = input("Enter the filename with the .bin : ")
+            json_file = input("Enter the filename with the .json : ")
+
+            decompress_file_bin(file, json_file)
+
+        elif choose == 5:
+            break
 
         
 
