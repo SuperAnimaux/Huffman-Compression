@@ -58,7 +58,7 @@ You will be prompted to choose one of the following options:
 ## Requirements
 
 * Python 3
-* Modules: json, ast
+* Modules: json, ast, os
 * The tree.py and file.py modules (custom modules for the Huffman tree and file structure)
 
 ## Notes
