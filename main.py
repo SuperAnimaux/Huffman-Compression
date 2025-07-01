@@ -2,6 +2,7 @@ from tree import Huffman_tree
 from file import File
 import ast
 import json
+import os
 
 def frequencies_count(string):
     result = {}
@@ -69,6 +70,11 @@ def compress_text(string, file=False):
 
 
 def read_file(file):
+
+    if not os.path.isfile(file):
+        print(f"Error: The file '{file}' does not exist.")
+        return None
+    
     with open(f"{file}", "r", encoding="utf-8") as f:
         content = f.read()
     return content
@@ -81,8 +87,15 @@ def read_compressed_file(filename):
 
 
 def load_json(json_file):
-    with open("code_table.json", "r") as f:
-        code_table = json.load(f)
+    if not os.path.isfile(json_file):
+        print(f"Error: The JSON file '{json_file}' does not exist.")
+        return None
+    try:
+        with open(json_file, "r") as f:
+            code_table = json.load(f)
+    except json.JSONDecodeError:
+        print("Error: JSON file is corrupted or not valid.")
+        return None
     return code_table
 
 
@@ -95,7 +108,11 @@ def compress_file(content):
 
 def decompress_file_bin(bin_filename, json_filename):
     compressed_bits = read_compressed_file(bin_filename)
+    if compressed_bits is None:
+        return
     code_table = load_json(json_filename)
+    if code_table is None:
+        return
     decompressed_text = decompress(compressed_bits, code_table)
     with open("decompressed.txt", "w", encoding="utf-8") as f:
         f.write(decompressed_text)
@@ -132,7 +149,16 @@ def main():
     print("Welcome to the Huffman compression algorithm ! \n This project implements the Huffman compression algorithm, an efficient lossless coding technique used to reduce the size of textual data. It calculates character frequencies, builds an optimized Huffman tree, and generates corresponding binary codes for each character.")
     while True :
         print("----------------\nChoose a functionality : \n 1. I want to compress a text ! \n 2. I want to decompress a text ! \n 3. I want to compress a file (only .txt)\n 4. I want to decompress a file (only .txt).\n 5. I want to exit")
-        choose = int(input())
+        
+        try:
+            choose = int(input("Choose an option: "))
+            if choose not in [1, 2, 3, 4, 5]:
+                print("Please enter a valid option number (1-5).")
+                continue
+            
+        except ValueError:
+            print("Invalid input, please enter a number.")
+            continue
 
         if choose == 1:
             text = input("Enter the text to compress : ")
@@ -167,4 +193,4 @@ def main():
 
         
 
-main()
+if __name__ == "__main__": main()
