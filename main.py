@@ -51,6 +51,7 @@ def compress_text(string):
     huffman_tree = create_huffman_tree(char_frequencies)
 
     binary_codes = create_binary_codes(huffman_tree)
+    print(f"This is the table of codes; keep it because it is necessary to decompress the text: {binary_codes}")
 
     compress_result = ""
 
@@ -60,4 +61,27 @@ def compress_text(string):
     return compress_result
 
 
+def decompress(binary_string, code_table):
+
+    inverse_code_table = {v: k for k, v in code_table.items()}
+
+    result = ""
+    code = ""
+
+    for bit in binary_string:
+        code += bit
+        if code in inverse_code_table:
+            result += inverse_code_table[code]
+            code = ""
+
+    return result
+
+
+def main():
+    Print("Welcome to the Huffman compression algorithm ! \n This project implements the Huffman compression algorithm, an efficient lossless coding technique used to reduce the size of textual data. It calculates character frequencies, builds an optimized Huffman tree, and generates corresponding binary codes for each character.")
+    while True :
+        print("Choose a functionality : \n 1. I want to compress a text ! \n 2. I want to decompress a text !")
+        choose = int(input())
+
+        
 
