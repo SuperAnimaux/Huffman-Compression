@@ -1,5 +1,6 @@
 from tree import Huffman_tree
 from file import File
+import ast
 
 def frequencies_count(string):
     result = {}
@@ -78,10 +79,28 @@ def decompress(binary_string, code_table):
 
 
 def main():
-    Print("Welcome to the Huffman compression algorithm ! \n This project implements the Huffman compression algorithm, an efficient lossless coding technique used to reduce the size of textual data. It calculates character frequencies, builds an optimized Huffman tree, and generates corresponding binary codes for each character.")
+    print("Welcome to the Huffman compression algorithm ! \n This project implements the Huffman compression algorithm, an efficient lossless coding technique used to reduce the size of textual data. It calculates character frequencies, builds an optimized Huffman tree, and generates corresponding binary codes for each character.")
     while True :
-        print("Choose a functionality : \n 1. I want to compress a text ! \n 2. I want to decompress a text !")
+        print("Choose a functionality : \n 1. I want to compress a text ! \n 2. I want to decompress a text ! \n 3. I want ot exit")
         choose = int(input())
+
+        if choose == 1:
+            text = input("Enter the text to compress : ")
+            binary_text =  ''.join(format(ord(c), '08b') for c in text)
+            print(f"----------------\nThe initial binary of your text is: {binary_text} , with a lenght of {len(text)*8} bits.")
+
+            compressed_text = compress_text(text)
+            print(f"The compressed text is : {compressed_text} , with a lenght of {len(compressed_text)} bits.")
+
+        elif choose == 2:
+            compressed_binary = input("Enter the compressed binary : ")
+            codes_table = ast.literal_eval(input("Enter the table of codes : "))
+
+            print(f"The text is : {decompress(compressed_binary, codes_table)}")
+
+        else:
+            print("Error")
 
         
 
+main()
